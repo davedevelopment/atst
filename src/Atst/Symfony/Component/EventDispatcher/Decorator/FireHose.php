@@ -27,6 +27,10 @@ class FireHose extends AbstractDecorator
      */
     protected $fireHoseEnabled = true;
 
+    /**
+     * @var bool
+     */
+    protected $oneTimeDisableFireHose = false;
 
     /**
      * Add a fire hose listener
@@ -62,12 +66,12 @@ class FireHose extends AbstractDecorator
      */
     public function dispatch($eventName, Event $event = null)
     {
-        if ($this->isFireHoseEnabled()) {
+        if ($this->isFireHoseEnabled() && !$this->oneTimeDisableFireHose) {
             foreach ($this->fireHoseListeners as $listener) {
                 call_user_func($listener, $eventName, $event);
             }
         }
-
+        $this->oneTimeDisableFireHose = false;
         $this->dispatcher->dispatch($eventName, $event);
     }
 
@@ -86,6 +90,16 @@ class FireHose extends AbstractDecorator
     public function disableFireHose() 
     {
         $this->fireHoseEnabled = false;
+    }
+
+    /**
+     * Disable the firehose for the next dispatch
+     *
+     */
+    public function oneTimeDisableFireHose()
+    {
+        $this->oneTimeDisableFireHose = true;
+        return $this;
     }
 
     /**

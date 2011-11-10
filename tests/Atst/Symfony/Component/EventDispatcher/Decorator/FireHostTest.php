@@ -75,5 +75,22 @@ class FireHoseTest extends \PHPUnit_Framework_TestCase
 
         $this->dispatcher->dispatch('test', $event);
     }
+
+    public function testOneTimeFireHoseDisabled()
+    {
+        $event = new \Symfony\Component\EventDispatcher\Event;
+        $obj   = $this->getMock('stdClass', array('printEvent'));
+
+        $obj->expects($this->once())
+            ->method('printEvent');
+
+        $this->dispatcher->addFireHoseListener(function($eventName, $event = null) use ($obj) {
+            $obj->printEvent($eventName, $event);
+        });
+
+        $this->dispatcher->oneTimeDisableFireHose()->dispatch('test', $event);
+        $this->dispatcher->dispatch('test', $event);
+    }
+ 
 }
 
